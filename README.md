@@ -1,28 +1,16 @@
-# Course Catalog
+# Course Catalog - Lab 2
 
-Course Catalog is a small Next.js App Router project for the Advanced Web Technologies course.
+A responsive Next.js course catalog styled with Tailwind CSS and shadcn/ui-style components.
 
-## Implemented
+## Included work
 
-- Static routes for `/` and `/about`
-- Server-rendered course list at `/courses`
-- Dynamic route `/courses/[id]` with awaited `params`, `generateStaticParams`, and `notFound()`
-- Shared navigation in `app/layout.tsx`
-- Server component course cards with `next/link`
-- Client component like button with local state
-- Loading and not-found UI for course pages
+- Responsive 1 / 2 / 3 / 4-column course grid and interactive course cards.
+- Styled navigation with active and hover states.
+- All bonus tasks: custom `brand` theme color, system dark mode, a custom `accent` Button variant, and a reusable Badge component.
 
-## Getting Started
+## Run locally
 
 ```bash
+npm install
 npm run dev
-```
-
-Open the printed local URL, usually `http://localhost:3000`.
-
-## Useful Commands
-
-```bash
-npm run lint
-npm run build
 ```

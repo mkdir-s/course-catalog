@@ -1,22 +1,28 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 type LikeButtonProps = {
   initialLikes: number;
+  courseTitle: string;
 };
 
-export function LikeButton({ initialLikes }: LikeButtonProps) {
-  const [likes, setLikes] = useState<number>(initialLikes);
+export function LikeButton({ initialLikes, courseTitle }: LikeButtonProps) {
+  const [likes, setLikes] = useState(initialLikes);
 
   return (
-    <button
-      type="button"
-      onClick={() => setLikes((currentLikes) => currentLikes + 1)}
-      className="rounded-md bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
-      aria-label={`Like this course. Current likes: ${likes}`}
+    <Button
+      variant="ghost"
+      size="sm"
+      aria-label={`Like ${courseTitle}`}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setLikes((currentLikes) => currentLikes + 1);
+      }}
     >
-      ❤ {likes}
-    </button>
+      ♥ {likes}
+    </Button>
   );
 }
