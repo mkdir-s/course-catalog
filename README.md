@@ -25,7 +25,15 @@ npm run dev -- --port 3000
 
 In the two standalone repositories, replace `04-backend` with `course-catalog-api` and `05-integration` with `course-catalog`. The source files themselves have the same paths relative to each project root.
 
-Backend Swagger: http://localhost:8000/docs. Frontend routes: `/`, `/about`, `/courses`, `/courses/web-security`, and `/filter`.
+Backend Swagger: http://localhost:8000/docs. Frontend routes: `/`, `/about`, `/courses`, `/courses/web-security`, `/filter`, and `/enrollments`.
+
+## View enrollments in the frontend
+
+Open `/enrollments` from the **Enrollments** navigation link. The page reads `GET /enrollments` directly from the browser and shows each record's number, student name, and course title with a link to its course. It refreshes every five seconds and provides a **Refresh** button.
+
+To demonstrate the full flow, open a course, submit the enrollment form, and follow **View enrollments** beneath the success message. The new record appears in the table and remains after reloading the page. A one-character name still displays the server's 422 response and does not create a record. The list also has loading, error, and empty states; restarting the backend clears its in-memory records.
+
+The enrollment view is covered by the browser test: empty and loading states, rejected and accepted submissions, navigation from the form, persistence after reload, automatic and manual refresh, mobile layout, error recovery, and clearing the list after a backend restart. Evidence from the isolated verification run is in [enrollment UI results](verification/enrollment-ui-results.json), [desktop screenshot](verification/enrollments.png), and [mobile screenshot](verification/enrollments-mobile.png).
 
 ## Environment variables
 
@@ -107,6 +115,8 @@ BROWSER_EXECUTABLE='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome
 ```
 
 `BACKEND_PYTHON` can override the backend Python executable. The backend dependencies must already be installed in its `.venv`.
+
+For isolated checks, the script accepts `FRONTEND_DIR`, `FRONTEND_PORT`, and `BACKEND_PORT`. Build the separate frontend directory with `API_URL` and `NEXT_PUBLIC_API_URL` pointing to the test backend port. The script refuses occupied ports so existing development servers remain running.
 
 Verified on 13 October 2026 (Asia/Almaty), with Next.js 16.4.0 and Chromium 153.0.8010.52:
 

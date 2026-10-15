@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import type { Enrollment } from "@/lib/courses";
 
@@ -56,7 +57,14 @@ export function EnrollForm({ courseId }: { courseId: string }) {
       >
         Enroll
       </button>
-      {status === "done" && <p role="status">You are enrolled. {message}</p>}
+      {status === "done" && (
+        <div>
+          <p role="status">You are enrolled. {message}</p>
+          <Link href="/enrollments" className="mt-2 inline-block font-medium text-brand hover:underline">
+            View enrollments
+          </Link>
+        </div>
+      )}
       {status === "rejected" && (
         <p role="alert" className="text-red-600">The server rejected the data: {message}</p>
       )}
