@@ -1,7 +1,7 @@
 export default function LoadingCourse() {
   return (
-    <section className="mx-auto w-full max-w-3xl px-6 py-12">
-      <p className="text-lg text-slate-600">Loading course...</p>
-    </section>
+    <main className="mx-auto max-w-3xl px-4 py-14 sm:px-6" aria-busy="true">
+      <p role="status">Loading course...</p>
+    </main>
   );
 }
