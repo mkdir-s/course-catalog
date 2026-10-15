@@ -33,8 +33,6 @@ Open `/enrollments` from the **Enrollments** navigation link. The page reads `GE
 
 To demonstrate the full flow, open a course, submit the enrollment form, and follow **View enrollments** beneath the success message. The new record appears in the table and remains after reloading the page. A one-character name still displays the server's 422 response and does not create a record. The list also has loading, error, and empty states; restarting the backend clears its in-memory records.
 
-The enrollment view is covered by the browser test: empty and loading states, rejected and accepted submissions, navigation from the form, persistence after reload, automatic and manual refresh, mobile layout, error recovery, and clearing the list after a backend restart. Evidence from the isolated verification run is in [enrollment UI results](verification/enrollment-ui-results.json), [desktop screenshot](verification/enrollments.png), and [mobile screenshot](verification/enrollments-mobile.png).
-
 ## Environment variables
 
 Create `.env.local` next to `package.json`:
@@ -68,15 +66,7 @@ The enrollment form deliberately has no client name-length constraint: submittin
 
 The final Next.js config enables neither Cache Components nor partial prefetching. Next.js 16.4.0 supplies the `retry` error-boundary prop. Like buttons are outside course links, so clicking a like does not navigate to the detail page.
 
-## Verification
-
-Run backend checks from its root:
-
-```bash
-.venv/bin/python -m unittest discover -s tests -v
-```
-
-Run frontend checks from its root while the backend is stopped:
+## Development commands
 
 ```bash
 npm run lint
@@ -84,54 +74,11 @@ npm run typecheck
 npm run build
 ```
 
-The verified build passes with no backend process and reports:
-
-```text
-○ /
-○ /_not-found
-○ /about
-ƒ /courses
-ƒ /courses/[id]
-○ /filter
-```
-
-For real browser verification, stop any project processes on ports 3000 and 8000 first. The test starts and stops its own production Next.js and temporary FastAPI servers; all broken variants are generated in a temporary directory, leaving the application source unchanged.
-
-```bash
-npx playwright install chromium
-npm run test:browser
-```
-
-For standalone sibling repositories:
-
-```bash
-BACKEND_DIR=../course-catalog-api npm run test:browser
-```
-
-If using installed Chrome on macOS:
-
-```bash
-BROWSER_EXECUTABLE='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' npm run test:browser
-```
-
-`BACKEND_PYTHON` can override the backend Python executable. The backend dependencies must already be installed in its `.venv`.
-
-For isolated checks, the script accepts `FRONTEND_DIR`, `FRONTEND_PORT`, and `BACKEND_PORT`. Build the separate frontend directory with `API_URL` and `NEXT_PUBLIC_API_URL` pointing to the test backend port. The script refuses occupied ports so existing development servers remain running.
-
-Verified on 13 October 2026 (Asia/Almaty), with Next.js 16.4.0 and Chromium 153.0.8010.52:
-
-- Nine backend integration tests pass, including all six documented operations, camelCase aliases, Lab 4 search/sort/pagination, persistent likes, 201/404/422 responses, CORS, and the bonus.
-- ESLint and TypeScript pass. The build succeeds with the backend stopped.
-- Browser checks cover six server-rendered cards without browser API requests; two likes followed by a reload; server validation for `A`; enrollment for `Aigerim`; the server enrollment list; six/two/six SWR results; and course not-found.
-- CDP Network records show no OPTIONS for likes, OPTIONS 200 before the first enrollment POST 422, a cached permission before POST 201, and OPTIONS again when cache is disabled.
-- A temporary one-second backend delay displays `loading.tsx`. With the backend stopped both course routes display `error.tsx`; starting it and clicking “Try again” restores the page without a manual reload.
-- All five required faults below were reproduced with real browser requests. The final source contains none of those faults.
-
-Evidence: [browser results and headers](verification/browser-results.json), [backend logs and traceback](verification/backend-experiments.log), [build output](verification/build.log), and [backend test output](verification/backend-tests.log). Screenshots: [catalog](verification/courses.png), [enrollment](verification/course-enrolled.png), [422 rejection](verification/validation-422.png), and [elective filter](verification/filter-electives.png).
+The course routes render on demand, so the frontend can be built while the backend is stopped.
 
 ## Breakage journal
 
-Each experiment changes one condition, uses a fresh browser context with cache disabled, and checks the filter, like, enrollment, and server-rendered catalog. The logs and console quotes are actual results in `verification/`. Browser Network can show a provisional failed POST row after a rejected preflight; that does not mean POST reached FastAPI. The backend logs prove which requests were executed.
+Each experiment changes one condition, uses a fresh browser context with cache disabled, and checks the filter, like, enrollment, and server-rendered catalog. Browser Network can show a provisional failed POST row after a rejected preflight; that does not mean POST reached FastAPI. Use the backend terminal to confirm which requests reached the server.
 
 ### Breakage 1 Remove CORS entirely
 
@@ -159,7 +106,7 @@ Each experiment changes one condition, uses a fresh browser context with cache d
 
 ### Breakage 4 Open another host
 
-- What I did: left the backend origin as `http://localhost:3000` and opened the frontend at `http://127.0.0.1:3000`. The automated matrix uses `next start`, which does not require a development-host exception. For the separate dev-server reproduction, temporarily add `allowedDevOrigins: ["127.0.0.1"]` to `next.config.ts`, restart `npm run dev`, then remove it afterwards.
+- What I did: left the backend origin as `http://localhost:3000` and opened the frontend at `http://127.0.0.1:3000`. The experiment used `next start`, which does not require a development-host exception. For the separate dev-server reproduction, temporarily add `allowedDevOrigins: ["127.0.0.1"]` to `next.config.ts`, restart `npm run dev`, then remove it afterwards.
 - Console: “Access to fetch at 'http://localhost:8000/courses' from origin 'http://127.0.0.1:3000' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.”
 - Network: GET courses and POST like are blocked, backend logs show **200**, and the like still increments. OPTIONS enrollments returns **400**, no enrollment POST reaches the backend. `/courses` still works because Next.js sends its own API request.
 - Cause: localhost and 127.0.0.1 are different hosts and therefore different origins even on the same computer.
@@ -197,8 +144,8 @@ Run the backend with:
 CORS_ORIGINS='http://localhost:3000,http://127.0.0.1:3000' fastapi dev main.py
 ```
 
-Both origins receive their exact `access-control-allow-origin` value; `http://evil.example` receives none. Comma-separated origins must contain no paths, trailing slashes or extra spaces. The normal default remains only `http://localhost:3000`. See [bonus curl output](verification/bonus-origins.log) and the dedicated backend test.
+Both origins receive their exact `access-control-allow-origin` value; `http://evil.example` receives none. Comma-separated origins must contain no paths, trailing slashes or extra spaces. The normal default remains only `http://localhost:3000`.
 
 ## Submission
 
-Submit the frontend and backend repository links from the course instructions. The workspace keeps the frontend in `05-integration` and the backend in `04-backend`; the standalone repositories keep their project files at the root. Today's integration history has at least five meaningful frontend commits and three meaningful backend commits, plus verification and documentation.
+Submit the frontend and backend repository links from the course instructions. The workspace keeps the frontend in `05-integration` and the backend in `04-backend`; the standalone repositories keep their project files at the root. Today's integration history has at least five meaningful frontend commits and three meaningful backend commits, plus documentation.
